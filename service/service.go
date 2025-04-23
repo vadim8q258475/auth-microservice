@@ -66,7 +66,7 @@ func (s *AuthService) IsTokenValid(ctx context.Context, request *pb.TokenRequest
 
 	token, err := s.authToken.Decode(tokenString)
 	if err != nil {
-		s.logger.Error(fmt.Sprintf("token parsing failed: %w", err))
+		s.logger.Error(fmt.Sprintf("token parsing failed: %s", err.Error()))
 		return nil, fmt.Errorf("token parsing failed: %w", err)
 	}
 
@@ -77,13 +77,13 @@ func (s *AuthService) IsTokenValid(ctx context.Context, request *pb.TokenRequest
 
 	claims, err := token.AsMap(ctx)
 	if err != nil {
-		s.logger.Error(fmt.Sprintf("invalid token claims: %w", err))
+		s.logger.Error(fmt.Sprintf("invalid token claims: %s", err.Error()))
 		return nil, fmt.Errorf("invalid token claims: %w", err)
 	}
 
 	email, ok := claims["email"].(string)
 	if !ok || email == "" {
-		s.logger.Error(fmt.Sprintf("email claim not found or invalid: %w", err))
+		s.logger.Error(fmt.Sprintf("email claim not found or invalid: %s", err.Error()))
 		return nil, errors.New("email claim not found or invalid")
 	}
 
@@ -92,7 +92,7 @@ func (s *AuthService) IsTokenValid(ctx context.Context, request *pb.TokenRequest
 
 	user, err := s.userService.GetByEmail(getCtx, &userpb.GetReuqest{Email: email})
 	if err != nil {
-		s.logger.Error(fmt.Sprintf("get by email error: %w", err))
+		s.logger.Error(fmt.Sprintf("get by email error: %s", err.Error()))
 		return nil, err
 	}
 
@@ -111,7 +111,7 @@ func (s *AuthService) Login(ctx context.Context, request *pb.LoginRequest) (*pb.
 		return nil, err
 	}
 	if user == nil {
-		s.logger.Info(fmt.Sprintf("cant login. user is not exists"))
+		s.logger.Info(fmt.Sprintln("cant login. user is not exists"))
 		return &pb.LoginResponse{Token: ""}, errors.New("user is not exists")
 	}
 
@@ -135,7 +135,7 @@ func (s *AuthService) Register(ctx context.Context, request *pb.ReqisterRequest)
 		return nil, err
 	}
 	if user != nil {
-		s.logger.Info(fmt.Sprintf("cant register. user is already exists"))
+		s.logger.Info("cant register. user is already exists")
 		return nil, errors.New("user already exists")
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
@@ -149,6 +149,6 @@ func (s *AuthService) Register(ctx context.Context, request *pb.ReqisterRequest)
 		s.logger.Error(fmt.Sprintf("create error: %s", err.Error()))
 		return nil, err
 	}
-	s.logger.Info(fmt.Sprintf(response.Query))
+	s.logger.Info(response.Query)
 	return &pb.ReqisterResponse{RegisterMessage: response.Query}, nil
 }
