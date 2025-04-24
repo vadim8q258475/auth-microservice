@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -23,10 +24,10 @@ func main() {
 
 	port := os.Getenv("PORT")
 	userPort := os.Getenv("USER_PORT")
-	host := os.Getenv("HOST")
+	host := os.Getenv("USER_HOST")
 	authSecretKey := os.Getenv("SECRET_KEY")
 
-	conn, err := grpc.Dial(host+":"+userPort, grpc.WithInsecure())
+	conn, err := grpc.Dial(host+":"+userPort, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
